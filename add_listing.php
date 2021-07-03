@@ -3,7 +3,13 @@ include('DBCONNECT.php');
 
 session_start();
 
-$u_id = $_SESSION['u_id'];
+if($_SESSION['u_id'] == null){
+  header('location:index.php');
+}
+else{
+  $u_id = $_SESSION['u_id'];
+}
+
 
 
 $getcategorysql = "SELECT * FROM product_categories";
@@ -234,7 +240,13 @@ input[type="color"]:focus,
       <div class="container">
 			 <form method="post" action="" enctype="multipart/form-data" class="row g-3">
 
-        <h5>Images of Your Product <span class="text-muted">(Multiple Recommended)</span></h5>
+        <h5>Images of Your Product <br><span class="text-muted">
+        
+        <li>Multiple Images </li>
+        <li>16:9 Aspect Ratio</li>
+        <li>Show The Product Clearly</li>
+        
+        </span></h5>
         <hr>
         <div class="col-md-8 mx-auto mb-4">
           <input class="form-control rounded mx-0" name="images[]" type="file" id="gallery-photo-add" multiple required="">
@@ -247,8 +259,8 @@ input[type="color"]:focus,
 
         
 
+        
         <h5>Product Information</h5>
-
         <hr>
 
 			  <div class="col-md-6">
@@ -261,7 +273,7 @@ input[type="color"]:focus,
             <figcaption class="figure-caption">Describe the Appearence, Condition, Usage & Other Factors</figcaption>
           <textarea name="pdesc" class="form-control rounded mx-0" cols="30" rows="3" id="Product_Desc" required=""></textarea>
 			  </div>
-			  <div class="col-12">
+			  <div class="col-12 mb-4">
 			    <label for="Product_Cat" class="form-label">Product Category</label>
 			    <select class="form-select rounded mx-0" name="category" id="Product_Cat" aria-label="Default select example" required="">
             <?php
@@ -273,6 +285,9 @@ input[type="color"]:focus,
             ?>  
           </select>
 			  </div>
+        
+
+        <h5>Exchange Information</h5>
         <hr> 
 			  <div class="col-12">
 			    <label for="inputAddress2" class="form-label">Exchange Preference</label>

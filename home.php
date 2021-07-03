@@ -21,7 +21,7 @@ $user_ver_state = $userdetailsarr['U_VER'];
 
 $getproductssql = "SELECT * FROM products INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID 
 INNER JOIN users ON products.P_BY_U_ID = users.U_ID
-ORDER BY P_VIEWS ASC; 
+ORDER BY P_VIEWS DESC; 
 ";
 $getproducts = mysqli_query($connectionString,$getproductssql);
 
@@ -31,6 +31,12 @@ $getalllistingssql = "SELECT * FROM products WHERE P_BY_U_ID = '$u_id'";
 $getalllistings = mysqli_query($connectionString,$getalllistingssql);
 
 $num_of_listings = mysqli_num_rows($getalllistings);
+
+$getallsavedsql = "SELECT * FROM saved_products WHERE S_BY_U_ID = '$u_id'";
+$getallsaved = mysqli_query($connectionString,$getallsavedsql);
+
+$num_of_saved = mysqli_num_rows($getallsaved);
+
 ?>
 
 
@@ -61,9 +67,9 @@ $num_of_listings = mysqli_num_rows($getalllistings);
   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/owlcarousel/assets/owl.carousel.min.css">
-  <link rel="stylesheet" href="assets/owlcarousel/assets/owl.theme.default.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.css" />
+  
+  
  
 
 
@@ -87,7 +93,14 @@ $num_of_listings = mysqli_num_rows($getalllistings);
   background-color: black;
 }
 
+.products {
+  width: 100%;
+  height: 100%;
+}
 
+#panel-cards > .card{
+  margin: 0 auto !important;
+}
 </style>
 <body>
 
@@ -117,8 +130,6 @@ $num_of_listings = mysqli_num_rows($getalllistings);
 
   <main id="main">
 
-
-
     <!-- ======= Breadcrumbs ======= -->
     <section class="breadcrumbs">
       <div class="container">
@@ -137,21 +148,33 @@ $num_of_listings = mysqli_num_rows($getalllistings);
     <section class="inner-page">
       <div class="container">
         
-        <div class="row">
+        <div class="row m-auto " id="panel-cards">
 
+       <div class="card border-danger text-danger p-0 col-10 col-sm-10 col-md-6 col-lg-2">
+        <a href="add_listing.php">
+         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              @
+              <span class="visually-hidden">unread messages</span>
+          </span>   
+        <div class="card-header"><i class="ri-chat-3-line ri-md"></i></div>
+        <div class="card-body text-dark">
+          <h5 class="card-title">Chat Box</h5> 
+        </div>
+        </a>
+      </div>    
       
-      <div class="card border-success text-success mb-3 p-0 m-2 col-sm-10 col-md col-lg">
+      <div class="card border-success text-success p-0 col-10 col-sm-10 col-md-6 col-lg-2">
         <a href="add_listing.php">  
         <div class="card-header"><i class="ri-add-line ri-md"></i></div>
         <div class="card-body text-dark">
           <h5 class="card-title">Add New Listing</h5>
-          <p class="card-text text-muted">Add A New Product For <strong class="text-success">Sale</strong> or <strong class="text-primary">Swap</strong></p>
         </div>
         </a>
       </div>
       
+    
 
-      <div class="card border-info text-info mb-3 p-0 m-2 col-sm-10 col-md col-lg">
+      <div class="card border-info text-info mb-4 p-0 col-10 col-sm-10 col-md-6 col-lg-2">
         <a href="product_listings.php"> 
          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
               <?php echo $num_of_listings?>
@@ -160,21 +183,20 @@ $num_of_listings = mysqli_num_rows($getalllistings);
         <div class="card-header"><i class="ri-list-check ri-md"></i></div>
         <div class="card-body text-dark">
           <h5 class="card-title">Manage Listings</h5>
-          <p class="card-text text-muted"><strong class="text-info">Edit</strong> or <strong class="text-danger">Delete</strong> Your Previous Listings</p>
+          
         </div>
         </a>
       </div>
 
-      <div class="card border-warning text-warning mb-3 p-0 m-2 col-sm-10 col-md col-lg">
+      <div class="card border-warning text-warning mb-4 p-0 col-10 col-sm-10 col-md-6 col-lg-2">
         <a href="saved_listings.php">
            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-              1+
+              <?php echo $num_of_saved?>
               <span class="visually-hidden">unread messages</span>
             </span>
         <div class="card-header"><i class="ri-save-3-fill ri-md"></i></i></div>
         <div class="card-body text-dark">
           <h5 class="card-title">Saved Listings</h5>
-          <p class="card-text text-muted">Manage Saved Listings </p>
         </div>
         </a>
       </div>
@@ -183,211 +205,171 @@ $num_of_listings = mysqli_num_rows($getalllistings);
 
 
         
+
         <hr>
+
+        <div class="browse">
+
         <a href="explore.php"><h3>Browse</h3></a>
         <h5>Most-Viewed Products</h5>
 
-<br>
-       
-    <div id="owl-demo" class="owl-carousel owl-theme row">
-     <?php
-      while($p_row = mysqli_fetch_assoc($getproducts)){
-
-        $p_id = $p_row['P_ID'];
-
-
-        $getallproductimagessql = "SELECT PI_IMG_URL FROM product_images WHERE PI_P_ID = '$p_id' LIMIT 0,1";
-        $getallproductimages = mysqli_query($connectionString,$getallproductimagessql);
-
-        if($p_row['P_FEATURED'] == 0){
-          $featured = 'hidden';
-          $color = 'secondary'; 
-        }
-        else if($p_row['P_FEATURED'] == 1){
-          $featured = '';
-          $color = 'warning';
-        }
-     ?>     
-          
-  <div class="item">
-
-    
-    <div class="card border-<?php echo $color?> p-0" style="">
-      <span class="badge rounded-pill bg-warning text-dark col-12 m-0 p-1" style="border-radius: 0px !important;" <?php echo $featured?> >Featured</span>
-
-        <div class="row mt-2">
-
-            <?php 
-              if($p_row['P_EXC_TYPE'] == 0){
-              ?>
-              <i class='ri-coin-fill ri-lg col text-warning' title='Money Preferred'></i> 
-              <?php
-              }
-              else if($p_row['P_EXC_TYPE'] == 1){
-              ?>
-              <i class='ri-swap-line ri-lg col text-info' title='Physical Product Swap Preferred'></i>
-              <?php
-              }
-            ?>
 
 
 
-             <span class="col">
-               <a href=""><i class="ri-save-line ri-xl" style="align-self: center;" title="Save Listing"></i></a>
-             </span>
-             
+       <!-- Slider main container -->
+        <div class="products swiper-container">
+          <!-- Additional required wrapper -->
+          <div class="swiper-wrapper mt-4">
+            <!-- Slides -->
 
-        </div>
-        
+            <?php
+            while($p_row = mysqli_fetch_assoc($getproducts)){
 
-    <a href="listing_details.php?id=<?php echo $p_id?>" style="color:black !important;">
-       
-    <?php 
-    while ($img_row = mysqli_fetch_assoc($getallproductimages)) {
-    ?>
+            $p_id = $p_row['P_ID'];
 
-      
-        <img src="<?php echo $img_row['PI_IMG_URL']?>" class="d-block img-responsive img-fluid" style="object-fit:scale-down; aspect-ratio: 2 / 1;" alt="...">
-      
+            $getallproductimagessql = "SELECT PI_IMG_URL FROM product_images WHERE PI_P_ID = '$p_id' LIMIT 0,1";
+            $getallproductimages = mysqli_query($connectionString,$getallproductimagessql);
 
-    <?php    
-    }
-    ?>
+            if($p_row['P_FEATURED'] == 0){
+              $featured = 'hidden';
+              $color = 'secondary'; 
+            }
+            else if($p_row['P_FEATURED'] == 1){
+              $featured = '';
+              $color = 'warning';
+            }
+        ?> 
 
 
+            <div class="swiper-slide">
+              
+              
+              <div class="card border-<?php echo $color?> p-0" style="max-width: 25rem; align-self: center; margin: auto !important;">
 
-      <div class="card-body">
+                 <?php 
+                  while ($img_row = mysqli_fetch_assoc($getallproductimages)) {
+                  ?>
 
-        <p class="card-text d-flex" style="justify-content: center; font-size:small; ">
-            <u><strong><?php echo $p_row['P_NAME']?></strong></u>
-        </p>
+                 <img src="<?php echo $img_row['PI_IMG_URL']?>" class="card-img-top d-flex img-responsive img-fluid" style="object-fit:scale-down; background-color: black; aspect-ratio: 16 / 9;" alt="...">
 
-        <p class="text-success muted"><em></em></p>
-        <hr>
-        <div class="row">
-            <span class="col text-muted " style="font-size: x-small; align-self: center;
-">
-               
+                  <?php    
+                  }
+                  ?>
+
+
                 
-                <?php 
+                <div class="card-body">
 
-                $months = date('m' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
-                $days = date('d' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+                  <h6 class="card-title row">
+                    <a href="listing_details.php?id=<?php echo $p_id?>" class="col-10"><strong ><?php echo $p_row['P_NAME']?></strong></a>
+                     <?php 
+                      if($p_row['P_EXC_TYPE'] == 0){
+                      ?>
+                      <i class='ri-coin-fill ri-lg col text-warning' title='Money Preferred'></i> 
+                      <?php
+                      }
+                      else if($p_row['P_EXC_TYPE'] == 1){
+                      ?>
+                      <i class='ri-swap-line ri-lg col text-info' title='Physical Product Swap Preferred'></i>
+                      <?php
+                      }
+                    ?>
+                  </h6>
 
-                if($months >= 12){
-                  echo "<strong>",floor($months/12) , "</strong> Years Ago";
-                }
-                else if($months < 12){
-                  echo  "<strong>",$months , "</strong> Months Ago";
-                }
+                    <div class="row mt-2">
 
-                ?>
-               
-            </span>
+                   
 
-            <span class="col-2">|</span>
+                <span class="col">
+                  <?php
+                    if($p_row['P_EXC_TYPE'] == '0'){
+                  ?>
+                  <strong><small>PKR <span class="text-success"><?php echo $p_row['P_MONETARY_VAL']?></span></small></strong>
+                  <?php
+                  }
+                  else if($p_row['P_EXC_TYPE'] == '1'){
+                    echo "<span style='font-size:small;'>Swap Available</span>";
+                  }
+                  ?>
+                </span>
 
-            <span class="col">
-              <?php
-                if($p_row['P_EXC_TYPE'] == '0'){
-              ?>
-              <strong><small>PKR <span class="text-success"><?php echo $p_row['P_MONETARY_VAL']?></span></small></strong>
-              <?php
-              }
-              else if($p_row['P_EXC_TYPE'] == '1'){
-                echo "<span style='font-size:x-small;'>Swap Available</span>";
-              }
-              ?>
-            </span>
+                 
 
-        </div>
-        
+                </div>
+
+            <hr>
+
+              <div class="row" style="align-items: flex-end;">
+
+                    <span class="col-4">
+                    <?php
+                      $checksavedsql = "SELECT * FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
+                      $checksaved = mysqli_query($connectionString,$checksavedsql);
+
+                    if(mysqli_num_rows($checksaved) == 0){
+                    ?>
+                     <a style="float: left; align-self: flex-end;" href="save_listing.php?id=<?php echo $p_id?>"><i class="ri-save-line ri-xl" style="align-self: center;" title="Save Listing"></i></a>
+                    <?php
+                    }
+                    else{
+                    ?>
+                    <a style="float: left;" href="unsave_listing.php?id=<?php echo $p_id?>"><i class="ri-save-fill ri-xl" style="align-self: center;" title="Un-Save Listing"></i></a>
+                    <?php 
+                    }
+                    ?>
+                   </span>
+
+                    <span class="text-muted col-8">
+                      <span style=" align-self: center; float:right; font-size: small;">
+                    <?php 
+
+                    $months = date('m' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+                    $days = date('d' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+
+                    if($months >= 12){
+                      echo "<strong>",floor($months/12) , "</strong> Year/s Old";
+                    }
+                    else if($months < 12){
+                      echo  "<strong>",$months , "</strong> Month/s Old";
+                    }
+                    ?>
+                    </span>
+                    </span>
+
+              </div>
+
+                  
+                </div>
+                <span class="badge rounded-pill bg-warning text-dark col-12 m-0 p-1" style="border-radius: 0px !important;" <?php echo $featured?> >Featured</span>
+              </div>
+
+              
+
+            </div>
+
+        <?php
+        }
+        ?>    
+          
+          </div>
+          <!-- If we need pagination -->
+          
+
+          <!-- If we need navigation buttons -->
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+
+          <!-- If we need scrollbar -->
+          
       </div>
-
-      </a>
-     
-    </div>
-    </a>
-
-  </div>
-
-
-  <?php 
-  }
-  ?>
-
-  <div class="item ">
-    <div class="card" >
-      <img src="assets/img/features-2.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item">
-   <div class="card" >
-      <img src="assets/img/features-3.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item ">
-   <div class="card" >
-      <img src="assets/img/features-4.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item ">
-    <div class="card" >
-      <img src="assets/img/features-3.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item ">
-    <div class="card" >
-      <img src="assets/img/features-2.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item ">
-    <div class="card" >
-      <img src="assets/img/features-4.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="item ">
-    <div class="card" >
-      <img src="assets/img/features-1.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      </div>
-    </div>
-  </div>
- 
 </div>
-    
-      
 
-      </div>
+    
+    </div>   
+
     </section>
 
-   
-   
+  
 
   </main><!-- End #main -->
 
@@ -429,31 +411,9 @@ $num_of_listings = mysqli_num_rows($getalllistings);
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-  <script src="assets/owlcarousel/owl.carousel.min.js"></script>
+  <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
 
-  <script>
-
- $('.owl-carousel').owlCarousel({
-    loop:true,
-    margin:10,
-    responsiveClass:true,
-    responsive:{
-        0:{
-            items:2,
-            nav:true
-        },
-        600:{
-            items:3,
-            nav:false
-        },
-        1000:{
-            items:5,
-            nav:true,
-            loop:false
-        }
-    }
-})
-  </script>
+  
   
   
 

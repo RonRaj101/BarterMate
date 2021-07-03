@@ -7,6 +7,11 @@ if($_SESSION['u_id'] == null){
 else{
   $u_id = $_SESSION['u_id'];
 }
+
+$getalllistingssql = "SELECT * FROM products 
+        INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID
+        WHERE P_BY_U_ID = '$u_id'";
+$getalllistings = mysqli_query($connectionString,$getalllistingssql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,14 +97,11 @@ else{
 
     <section class="inner-page" style="min-height: 20rem;">
       <div class="container">
-                <div class="accordion accordion-flush" id="accordionFlushExample">  
-        <?php
-        $getalllistingssql = "SELECT * FROM products 
-        INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID
-        WHERE P_BY_U_ID = '$u_id'";
-        $getalllistings = mysqli_query($connectionString,$getalllistingssql);
 
-        
+        <center><h3>Existing Listings<span class='text-muted'> (<?php echo mysqli_num_rows($getalllistings)?>)</span></h3></center>
+
+        <div class="accordion accordion-flush" id="accordionFlushExample">  
+        <?php
 
         while ($listing_row = mysqli_fetch_assoc($getalllistings)) {
 
@@ -112,8 +114,6 @@ else{
 
         else{
         ?>
-
-        <center><h3>Existing Listings<span class='text-muted'> (<?php echo mysqli_num_rows($getalllistings)?>)</span></h3></center><br>
         
         <?php  
 
@@ -136,15 +136,42 @@ else{
           <?php 
           while($existing_img_row = mysqli_fetch_assoc($existingproductimages)){
           ?>
-          <img class="col-2 mt-2" src="<?php echo $existing_img_row['PI_IMG_URL']?>" style="aspect-ratio:16/9;" alt="">
+          <img class="col-4 mt-2" src="<?php echo $existing_img_row['PI_IMG_URL']?>" style="aspect-ratio:16/9;" alt="">
           <?php
           }
           ?>
           </div>
+
         <p><?php echo $listing_row['P_DESC']?></p>
+        <p class="text-muted">Listing Views: <strong><?php echo $listing_row['P_VIEWS']?></strong></p>
         <p class="text-muted">Category: <?php echo $listing_row['PC_NAME']?></p>
         <p class="text-muted">Date Created: <?php echo $listing_row['P_CREATE_DATE']?></p>
-        <p class="text-muted">Swap Type: <?php echo $listing_row['P_EXC_TYPE']?></p>
+        <p class="text-muted">Swap Type: <?php 
+
+        if($listing_row['P_EXC_TYPE'] == 0){
+        	echo "Monetary"," (PKR ",$listing_row['P_MONETARY_VAL'],")";
+        }
+
+        else{
+        	echo "Physical Product";
+        }
+
+
+    	?></p>
+
+    	 <p class="text-muted">Featured: <?php 
+
+        if($listing_row['P_FEATURED'] == 0){
+        	echo "Not Featured! <br> <a href='' class='btn btn-warning mt-3'>Feature Now (PKR 499)</a>";
+        }
+
+        else{
+        	echo "<strong><span class='text-success'>Featured</span></strong>";
+        }
+
+
+    	?></p>
+
         </div>
     </div>
   </div>

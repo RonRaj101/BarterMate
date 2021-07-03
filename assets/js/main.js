@@ -237,6 +237,50 @@
     }
   });
 
+  //Product Slider
+
+  const swiper = new Swiper('.products', {
+  // Optional parameters
+  direction: 'horizontal',
+  loop: false,
+
+  // If we need pagination
+  pagination: {
+    el: '.swiper-pagination',
+  },
+
+//mobile breakpoints
+  breakpoints: {
+      320: {
+        slidesPerView: 1,
+        spaceBetween: 20
+      },
+
+      768: {
+        slidesPerView: 2,
+        spaceBetween: 20
+      },
+
+
+      1200: {
+        slidesPerView: 4,
+        spaceBetween: 20
+      }
+    },
+
+
+  // Navigation arrows
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+
+  // And if we need scrollbar
+  scrollbar: {
+    el: '.swiper-scrollbar',
+  },
+});
+
   /**
    * Animation on scroll
    */

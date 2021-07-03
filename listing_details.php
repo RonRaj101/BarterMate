@@ -11,6 +11,8 @@ else{
 
 $p_id = $_GET['id'];
 
+
+
 $getallproductinfosql = "SELECT * FROM products
 INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID
 INNER JOIN users ON products.P_BY_U_ID = users.U_ID
@@ -19,10 +21,24 @@ $getallproductinfo = mysqli_query($connectionString,$getallproductinfosql);
 
 $product_info_array = mysqli_fetch_array($getallproductinfo);
 
+if($product_info_array['P_BY_U_ID'] == $u_id){
+  $_SESSION['views'] = 0;
+}
+else if($product_info_array['P_BY_U_ID'] != $u_id){
+  if(isset($_SESSION['views'])){
+  $addviewsql = "UPDATE products SET P_VIEWS = P_VIEWS + 1 WHERE P_ID = '$p_id'";
+  $addview = mysqli_query($connectionString,$addviewsql);
+  unset($_SESSION['views']);
+}
+
+}
+
 //--//
 
-$getproductssql = "SELECT * FROM products INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID 
+$getproductssql = "SELECT * FROM products 
+INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID 
 INNER JOIN users ON products.P_BY_U_ID = users.U_ID
+WHERE products.P_ID != '$p_id'
 ORDER BY P_VIEWS ASC; 
 ";
 $getproducts = mysqli_query($connectionString,$getproductssql);
@@ -133,6 +149,18 @@ $curr_date = date("Y-m-d");
     <section id="portfolio-details" class="portfolio-details">
       <div class="container">
 
+
+        <?php 
+        if($product_info_array == null){
+        echo "<br><center>
+        <h3 class='text-muted'>Listing Not Found</h3>
+        <h6 class='text-muted'>May Have Been Removed Or Does Not Exist!</h6>
+        <br>
+        </center>";
+        }
+        else{
+        ?>
+
         <div class="row gy-4">
 
           <div class="col-lg-8">
@@ -149,7 +177,7 @@ $curr_date = date("Y-m-d");
                 ?>
 
                 <div class="carousel-item <?php echo $first_active?>">
-                  <img src="<?php echo $image_row['PI_IMG_URL'] ?>" class="d-block w-100" style="max-height:40rem;" alt="">
+                  <img src="<?php echo $image_row['PI_IMG_URL'] ?>" class="d-block w-100" style="max-height:40rem; aspect-ratio:4/3; background-color: black;" alt="">
                 </div>
 
                 <?php
@@ -170,24 +198,73 @@ $curr_date = date("Y-m-d");
 
             <br> 
 
-            <div class="other-info">
-              Lorem ipsum dolor sit amet consectetur adipisicing, elit. Laboriosam alias non fugiat distinctio sapiente et magnam, inventore numquam odio nobis quis accusantium temporibus iste earum pariatur at atque beatae minima?
-              Deleniti quidem et recusandae vel eveniet quae nisi reiciendis nesciunt voluptatibus rerum, sit. Enim, quibusdam labore ipsam cupiditate nulla sunt deserunt dignissimos dolorum eligendi libero illo omnis minus laudantium ratione!
-              Natus dicta esse soluta, nesciunt, debitis quidem quis. Iure amet recusandae pariatur facere aspernatur maiores, exercitationem, magnam consequatur, fugiat cum adipisci, dicta perspiciatis? Corporis explicabo autem laborum eligendi enim libero?
-              Earum, aspernatur. Quod a explicabo atque dolores maiores, saepe non porro nihil ipsam, architecto nostrum quia ipsum reiciendis aliquam! Beatae, aspernatur. Quisquam eum aliquid et quis, commodi! Eos, voluptatem praesentium?
-              Ut aliquam quam vitae iure sint illo voluptate eius assumenda aspernatur quia, aperiam est a, odio, iste nisi, eveniet inventore? Totam repudiandae quaerat doloremque. Laborum ullam molestiae, reiciendis autem officia!
-            </div>
-
-          </div>
-
-          <div class="col-lg-4 ml-3">
-            
-             <div class="portfolio-description p-2" >
+            <div class="portfolio-description p-2" >
               <h2><?php echo $product_info_array['P_NAME'] ?></h2>
               <p>
                 <?php echo $product_info_array['P_DESC'] ?>
               </p>
             </div>
+
+          
+
+          </div>
+
+          <div class="col-lg-4 ml-3">
+              <span class="row">
+                    <?php
+                      $checksavedsql = "SELECT * FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
+                      $checksaved = mysqli_query($connectionString,$checksavedsql);
+
+                    if(mysqli_num_rows($checksaved) == 0){
+                    ?>
+                     <a style="float: left; align-self: flex-end;" href="save_listing.php?id=<?php echo $p_id?>"><i class="ri-save-line ri-3x" style="align-self: center;" title="Save Listing"></i></a>
+                    <?php
+                    }
+                    else{
+                    ?>
+                    <a style="float: left;" href="unsave_listing.php?id=<?php echo $p_id?>"><i class="ri-save-fill ri-3x" style="align-self: center;" title="Un-Save Listing"></i></a>
+                    <?php 
+                    }
+                    ?>
+              </span>      
+                  
+              
+
+              <div class="other-info">
+               <?php 
+               if($product_info_array['P_EXC_TYPE'] == 0){
+               ?>
+
+               <h3>Available For </h3>
+               <h2>PKR <span class="text-success"><?php echo $product_info_array['P_MONETARY_VAL'] ?></span></h2>
+
+               <?php
+               }
+               else{
+               ?>
+
+               <h4>
+                <strong>Exchange With</strong>
+                <ul style="list-style: square;">
+                <?php 
+                $getprefsql = "SELECT * FROM product_exchange_prefs 
+                INNER JOIN product_categories ON product_exchange_prefs.PE_PC_ID = product_categories.PC_ID
+                WHERE PE_P_ID = '$p_id'";
+                $getpref = mysqli_query($connectionString,$getprefsql);
+
+                while ($pref_row = mysqli_fetch_assoc($getpref)) {
+                ?>
+                <li><?php echo $pref_row['PC_NAME']?></li>
+               <?php
+                }
+                ?>
+                </ul>
+              </h4>
+                <?php
+               }
+               ?>
+              </div>
+          
             <br>
 
              <div class="portfolio-info p-4" >
@@ -218,143 +295,164 @@ $curr_date = date("Y-m-d");
 
         </div>
 
+        <?php
+      }
+        ?>
+
         <br>
 
 <hr>
         <div class="row">
 
-        <h3>Browse</h3>
+        <a href="explore.php"><h3>Browse</h3></a>
         <h5>Related Products</h5>
 
-          <div id="owl-demo" class="owl-carousel owl-theme row mt-3">
-     <?php
-      while($p_row = mysqli_fetch_assoc($getproducts)){
+<br>
+    <div class="products swiper-container">
+          <!-- Additional required wrapper -->
+          <div class="swiper-wrapper mt-4">
+            <!-- Slides -->
 
-        $p_id = $p_row['P_ID'];
+            <?php
+            while($p_row = mysqli_fetch_assoc($getproducts)){
 
+            $p_id = $p_row['P_ID'];
 
-        $getallproductimagessql = "SELECT PI_IMG_URL FROM product_images WHERE PI_P_ID = '$p_id' LIMIT 0,1";
-        $getallproductimages = mysqli_query($connectionString,$getallproductimagessql);
+            $getallproductimagessql = "SELECT PI_IMG_URL FROM product_images WHERE PI_P_ID = '$p_id' LIMIT 0,1";
+            $getallproductimages = mysqli_query($connectionString,$getallproductimagessql);
 
-        if($p_row['P_FEATURED'] == 0){
-          $featured = 'hidden';
-
-          $color = 'secondary'; 
-        }
-        else if($p_row['P_FEATURED'] == 1){
-          $featured = '';
-          $color = 'warning';
-        }
-     ?>     
-          
-  <div class="item">
-
-    
-    <div class="card border-<?php echo $color?> p-0" style="">
-
-      <span class="badge rounded-pill bg-warning text-dark col-12 m-0 p-1" style="border-radius: 0px !important;" <?php echo $featured?> >Featured</span>
-
-        <div class="row mt-2">
-
-            <?php 
-              if($p_row['P_EXC_TYPE'] == 0){
-              ?>
-              <i class='ri-coin-fill ri-lg col text-warning' title='Money Preferred'></i> 
-              <?php
-              }
-              else if($p_row['P_EXC_TYPE'] == 1){
-              ?>
-              <i class='ri-swap-line ri-lg col text-info' title='Physical Product Swap Preferred'></i>
-              <?php
-              }
-            ?>
+            if($p_row['P_FEATURED'] == 0){
+              $featured = 'hidden';
+              $color = 'secondary'; 
+            }
+            else if($p_row['P_FEATURED'] == 1){
+              $featured = '';
+              $color = 'warning';
+            }
+        ?> 
 
 
+            <div class="swiper-slide">
+              
+              
+              <div class="card border-<?php echo $color?> p-0" style="max-width: 25rem; margin: auto !important; align-self: center;">
 
-             <span class="col">
-               <a href=""><i class="ri-save-line ri-xl" style="align-self: center;" title="Save Listing"></i></a>
-             </span>
-             
+                 <?php 
+                  while ($img_row = mysqli_fetch_assoc($getallproductimages)) {
+                  ?>
 
-        </div>
-        
+                 <img src="<?php echo $img_row['PI_IMG_URL']?>" class="card-img-top d-flex img-responsive img-fluid" style="object-fit:scale-down; background-color: black; aspect-ratio: 16 / 9;" alt="...">
 
-    <a href="listing_details.php?id=<?php echo $p_id?>" style="color:black !important;">
-       
-    <?php 
-    while ($img_row = mysqli_fetch_assoc($getallproductimages)) {
-    ?>
-
-      
-        <img src="<?php echo $img_row['PI_IMG_URL']?>" class="d-block img-responsive img-fluid" style="object-fit:scale-down; aspect-ratio: 16 / 9;" alt="...">
-      
-
-    <?php    
-    }
-    ?>
+                  <?php    
+                  }
+                  ?>
 
 
-
-      <div class="card-body">
-
-        <p class="card-text d-flex" style="justify-content: center; font-size:small; ">
-            <u><strong><?php echo $p_row['P_NAME']?></strong></u>
-        </p>
-
-        <p class="text-success muted"><em></em></p>
-        <hr>
-        <div class="row">
-            <span class="col text-muted " style="font-size: x-small; align-self: center;
-">
-               
                 
-                <?php 
+                <div class="card-body">
 
-                $months = date('m' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
-                $days = date('d' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+                  <h6 class="card-title row">
+                    <a href="listing_details.php?id=<?php echo $p_id?>" class="col-10"><strong ><?php echo $p_row['P_NAME']?></strong></a>
+                     <?php 
+                      if($p_row['P_EXC_TYPE'] == 0){
+                      ?>
+                      <i class='ri-coin-fill ri-lg col text-warning' title='Money Preferred'></i> 
+                      <?php
+                      }
+                      else if($p_row['P_EXC_TYPE'] == 1){
+                      ?>
+                      <i class='ri-swap-line ri-lg col text-info' title='Physical Product Swap Preferred'></i>
+                      <?php
+                      }
+                    ?>
+                  </h6>
 
-                if($months >= 12){
-                  echo "<strong>",floor($months/12) , "</strong> Years Ago";
-                }
-                else if($months < 12){
-                  echo  "<strong>",$months , "</strong> Months Ago";
-                }
+                    <div class="row mt-2">
 
-                ?>
-               
-            </span>
+                   
 
-            <span class="col-2">|</span>
+                <span class="col">
+                  <?php
+                    if($p_row['P_EXC_TYPE'] == '0'){
+                  ?>
+                  <strong><small>PKR <span class="text-success"><?php echo $p_row['P_MONETARY_VAL']?></span></small></strong>
+                  <?php
+                  }
+                  else if($p_row['P_EXC_TYPE'] == '1'){
+                    echo "<span style='font-size:small;'>Swap Available</span>";
+                  }
+                  ?>
+                </span>
 
-            <span class="col">
-              <?php
-                if($p_row['P_EXC_TYPE'] == '0'){
-              ?>
-              <strong><small>PKR <span class="text-success"><?php echo $p_row['P_MONETARY_VAL']?></span></small></strong>
-              <?php
-              }
-              else if($p_row['P_EXC_TYPE'] == '1'){
-                echo "<span style='font-size:x-small;'>Swap Available</span>";
-              }
-              ?>
-            </span>
+                 
 
-        </div>
-        
+                </div>
+
+            <hr>
+
+              <div class="row" style="align-items: flex-end;">
+
+                    <span class="col-4">
+                    <?php
+                      $checksavedsql = "SELECT * FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
+                      $checksaved = mysqli_query($connectionString,$checksavedsql);
+
+                    if(mysqli_num_rows($checksaved) == 0){
+                    ?>
+                     <a style="float: left; align-self: flex-end;" href="save_listing.php?id=<?php echo $p_id?>"><i class="ri-save-line ri-xl" style="align-self: center;" title="Save Listing"></i></a>
+                    <?php
+                    }
+                    else{
+                    ?>
+                    <a style="float: left;" href="unsave_listing.php?id=<?php echo $p_id?>"><i class="ri-save-fill ri-xl" style="align-self: center;" title="Un-Save Listing"></i></a>
+                    <?php 
+                    }
+                    ?>
+                   </span>
+
+                    <span class="text-muted col-8">
+                      <span style=" align-self: center; float:right; font-size: small;">
+                    <?php 
+
+                    $months = date('m' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+                    $days = date('d' ,strtotime($curr_date) - strtotime($p_row['P_CREATE_DATE']));
+
+                    if($months >= 12){
+                      echo "<strong>",floor($months/12) , "</strong> Year/s Old";
+                    }
+                    else if($months < 12){
+                      echo  "<strong>",$months , "</strong> Month/s Old";
+                    }
+                    ?>
+                    </span>
+                    </span>
+
+              </div>
+
+                  
+                </div>
+                <span class="badge rounded-pill bg-warning text-dark col-12 m-0 p-1" style="border-radius: 0px !important;" <?php echo $featured?> >Featured</span>
+              </div>
+
+              
+
+            </div>
+
+        <?php
+        }
+        ?>    
+          
+          </div>
+          <!-- If we need pagination -->
+          
+
+          <!-- If we need navigation buttons -->
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+
+          <!-- If we need scrollbar -->
+          
       </div>
-
-      </a>
-     
-    </div>
-    </a>
-
-  </div>
-
-
-  <?php 
-  }
-  ?>
-        </div>
 
       </div>
     </section><!-- End Portfolio Details Section -->
