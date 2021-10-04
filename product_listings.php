@@ -8,6 +8,16 @@ else{
   $u_id = $_SESSION['u_id'];
 }
 
+$getuserdetailssql = "SELECT * FROM users WHERE U_ID = '$u_id'";
+$getuserdetails = mysqli_query($connectionString,$getuserdetailssql);
+
+$userdetailsarr = mysqli_fetch_array($getuserdetails);
+
+$user_name = $userdetailsarr['U_NAME'];
+$user_ver_state = $userdetailsarr['U_VER'];
+$user_img = $userdetailsarr['U_IMG_URL'];
+
+
 $getalllistingssql = "SELECT * FROM products 
         INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID
         WHERE P_BY_U_ID = '$u_id'";
@@ -64,16 +74,7 @@ $getalllistings = mysqli_query($connectionString,$getalllistingssql);
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
 
-        <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto" href="index.php">Home</a></li>
-          <li><a class="nav-link scrollto" href="explore.php">Explore</a></li>
-          <li><a class="nav-link scrollto" href="store.php"> <i style="margin-left: 0px !important;" class='bx bx-coin bx-sm'> </i> 100</a></li>
-          
-          <li><a class="nav-link scrollto" href="logout.php">Logout</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+        <?php include_once('navbar.php') ?>
 
     </div>
   </header><!-- End Header -->
@@ -98,7 +99,10 @@ $getalllistings = mysqli_query($connectionString,$getalllistingssql);
     <section class="inner-page" style="min-height: 20rem;">
       <div class="container">
 
-        <center><h3>Existing Listings<span class='text-muted'> (<?php echo mysqli_num_rows($getalllistings)?>)</span></h3></center>
+          <div class="row m-1 mb-3">
+            <h3 class="col-8">Existing Listings<span class='text-muted'> (<?php echo mysqli_num_rows($getalllistings)?>)</span></h3>
+              <a class="col-4" href="add_listing.php"><button style="float: right;" class="btn btn-success"><i class="bi bi-plus-lg"></i> Add New </button></a>
+          </div>
 
         <div class="accordion accordion-flush" id="accordionFlushExample">  
         <?php
@@ -108,6 +112,7 @@ $getalllistings = mysqli_query($connectionString,$getalllistingssql);
           if($listing_row == null){
             echo "<center>
         <h3 class='text-muted'>No Listings Found!</h3>
+        <p class='text-muted'>Add New Using the Button Above</p>
         <br>
         </center>";
         }
@@ -136,7 +141,7 @@ $getalllistings = mysqli_query($connectionString,$getalllistingssql);
           <?php 
           while($existing_img_row = mysqli_fetch_assoc($existingproductimages)){
           ?>
-          <img class="col-4 mt-2" src="<?php echo $existing_img_row['PI_IMG_URL']?>" style="aspect-ratio:16/9;" alt="">
+          <img class="col-4 mt-2" src="<?php echo $existing_img_row['PI_IMG_URL']?>" style="aspect-ratio:auto;" alt="">
           <?php
           }
           ?>

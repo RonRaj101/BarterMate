@@ -252,20 +252,22 @@
 //mobile breakpoints
   breakpoints: {
       320: {
-        slidesPerView: 1,
-        spaceBetween: 20
+        slidesPerView: 1.5,
+        spaceBetween: 2
       },
 
       768: {
         slidesPerView: 2,
-        spaceBetween: 20
+        spaceBetween: 3
       },
 
 
       1200: {
         slidesPerView: 4,
-        spaceBetween: 20
+        spaceBetween: 5
       }
+
+
     },
 
 

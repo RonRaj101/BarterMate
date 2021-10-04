@@ -17,10 +17,12 @@ $userdetailsarr = mysqli_fetch_array($getuserdetails);
 
 $user_name = $userdetailsarr['U_NAME'];
 $user_ver_state = $userdetailsarr['U_VER'];
+$user_img = $userdetailsarr['U_IMG_URL'];
 
 
 $getproductssql = "SELECT * FROM products INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID 
 INNER JOIN users ON products.P_BY_U_ID = users.U_ID
+WHERE products.P_STATUS = '1'
 ORDER BY P_VIEWS DESC; 
 ";
 $getproducts = mysqli_query($connectionString,$getproductssql);
@@ -67,10 +69,7 @@ $num_of_saved = mysqli_num_rows($getallsaved);
   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.css" />
-  
-  
- 
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
 
   <!-- Template Main CSS File -->
@@ -101,11 +100,21 @@ $num_of_saved = mysqli_num_rows($getallsaved);
 #panel-cards > .card{
   margin: 0 auto !important;
 }
+
+@media screen and (max-width: 990px) {
+  #panel-cards-mobile{
+    display: block;
+  }
+}
+
+
 </style>
-<body>
+
+
+<body class="animate_animated animate__slideInLeft">
 
   <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top d-flex align-items-center ">
+  <header id="header" class="fixed-top d-flex align-items-center">
     <div class="container d-flex align-items-center justify-content-between">
 
       <div class="logo">
@@ -113,16 +122,8 @@ $num_of_saved = mysqli_num_rows($getallsaved);
         <!-- Uncomment below if you prefer to use an image logo -->
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
-   
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto active" href="index.php">Home</a></li>
-          <li><a class="nav-link scrollto" href="explore.php">Explore</a></li>
-          <li><a class="nav-link scrollto" href="store.php"> <i style="margin-left: 0px !important;" class='bx bx-coin bx-sm'> </i> 100</a></li>
-          <li><a class="nav-link scrollto" href="logout.php">Logout</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+
+    <?php include_once('navbar.php') ?>
 
     </div>
   </header><!-- End Header -->
@@ -144,37 +145,49 @@ $num_of_saved = mysqli_num_rows($getallsaved);
       </div>
     </section><!-- End Breadcrumbs -->
 
-
+  
     <section class="inner-page">
-      <div class="container">
-        
-        <div class="row m-auto " id="panel-cards">
 
-       <div class="card border-danger text-danger p-0 col-10 col-sm-10 col-md-6 col-lg-2">
-        <a href="add_listing.php">
+
+<div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 11">
+  <div id="liveToast" class="toast hide bg-success text-light " role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-body d-flex row">
+      <center>
+     <i class="ri-check-double-line ri-xl col-1" style="align-self: center; vertical-align: -0.25rem;"></i> <span class="col">Listing Saved Successfully</span>
+     </center>
+    </div>
+  </div>
+</div>
+
+      <div class="container">
+
+        <div class="row m-auto" id="panel-cards">
+
+       <div class="card border-danger text-danger p-0 col-md-5 col-lg-2">
+        <a href="contacts.php">
          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
               @
               <span class="visually-hidden">unread messages</span>
           </span>   
         <div class="card-header"><i class="ri-chat-3-line ri-md"></i></div>
         <div class="card-body text-dark">
-          <h5 class="card-title">Chat Box</h5> 
+          <p class="card-title">Chat Box</p>
         </div>
         </a>
       </div>    
       
-      <div class="card border-success text-success p-0 col-10 col-sm-10 col-md-6 col-lg-2">
+      <div class="card border-success text-success p-0  col-md-5 col-lg-3">
         <a href="add_listing.php">  
         <div class="card-header"><i class="ri-add-line ri-md"></i></div>
         <div class="card-body text-dark">
-          <h5 class="card-title">Add New Listing</h5>
+          <p class="card-title">Add New Listing</p>
         </div>
         </a>
       </div>
       
     
 
-      <div class="card border-info text-info mb-4 p-0 col-10 col-sm-10 col-md-6 col-lg-2">
+      <div class="card border-info text-info mb-4 p-0  col-md-5 col-lg-3 ">
         <a href="product_listings.php"> 
          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
               <?php echo $num_of_listings?>
@@ -182,13 +195,13 @@ $num_of_saved = mysqli_num_rows($getallsaved);
           </span> 
         <div class="card-header"><i class="ri-list-check ri-md"></i></div>
         <div class="card-body text-dark">
-          <h5 class="card-title">Manage Listings</h5>
+          <p class="card-title">Manage Listings</p>
           
         </div>
         </a>
       </div>
 
-      <div class="card border-warning text-warning mb-4 p-0 col-10 col-sm-10 col-md-6 col-lg-2">
+      <div class="card border-warning text-warning mb-4 p-0  col-md-5 col-lg-2 ">
         <a href="saved_listings.php">
            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
               <?php echo $num_of_saved?>
@@ -196,12 +209,16 @@ $num_of_saved = mysqli_num_rows($getallsaved);
             </span>
         <div class="card-header"><i class="ri-save-3-fill ri-md"></i></i></div>
         <div class="card-body text-dark">
-          <h5 class="card-title">Saved Listings</h5>
+          <p class="card-title">Saved Listings</p>
         </div>
         </a>
       </div>
 
         </div>  
+
+        <div class="row m-auto" id="panel-cards-mobile" style="display: none;">
+          <button type="button" class="btn btn-outline-danger btn-lg col-md-5 col-lg-2">Danger</button>
+        </div>
 
 
         
@@ -244,7 +261,7 @@ $num_of_saved = mysqli_num_rows($getallsaved);
             <div class="swiper-slide">
               
               
-              <div class="card border-<?php echo $color?> p-0" style="max-width: 25rem; align-self: center; margin: auto !important;">
+              <div class="card border-<?php echo $color?> p-0" style="max-width: 19rem; align-self: center; margin: auto !important;">
 
                  <?php 
                   while ($img_row = mysqli_fetch_assoc($getallproductimages)) {
@@ -261,7 +278,7 @@ $num_of_saved = mysqli_num_rows($getallsaved);
                 <div class="card-body">
 
                   <h6 class="card-title row">
-                    <a href="listing_details.php?id=<?php echo $p_id?>" class="col-10"><strong ><?php echo $p_row['P_NAME']?></strong></a>
+                    <a href="listing_details.php?id=<?php echo $p_id?>" class="col-10"><strong class="text-truncate"><?php echo $p_row['P_NAME']?></strong></a>
                      <?php 
                       if($p_row['P_EXC_TYPE'] == 0){
                       ?>
@@ -402,7 +419,7 @@ $num_of_saved = mysqli_num_rows($getallsaved);
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
@@ -411,11 +428,8 @@ $num_of_saved = mysqli_num_rows($getallsaved);
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
 
-  
-  
-  
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
 
 
 

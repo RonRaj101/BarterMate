@@ -63,7 +63,7 @@ if($_SESSION['u_id'] != null){
 <body>
 
   <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top d-flex align-items-center  header-transparent ">
+  <header id="header" class="fixed-top d-flex align-items-center header-transparent ">
     <div class="container d-flex align-items-center justify-content-between">
 
       <div class="logo">
@@ -76,7 +76,7 @@ if($_SESSION['u_id'] != null){
         <ul>
           <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
           <li><a class="nav-link scrollto" href="#about">About</a></li>
-          <li><a class="nav-link scrollto " href="#portfolio">Portfolio</a></li>
+          <li><a class="nav-link scrollto " href="#portfolio">Listings</a></li>
           <li><a class="nav-link scrollto" href="#pricing">Pricing</a></li>
           <li><a class="nav-link scrollto" href="#team">Team</a></li>
           <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
@@ -749,20 +749,20 @@ if($_SESSION['u_id'] != null){
   <script src="assets/js/main.js"></script>
 
   <script>
-      
-var text = ["<span class='text-success'>Swap</span>","<span class='text-primary'>Barter</span>","<span class='text-warning'>Trade</span>","<span class='text-danger'>Exchange</span>"];
-var counter = 0;
-var elem = document.getElementById("synonyms");
-var inst = setInterval(change, 800);
+          
+    var text = ["<span class='text-success'>Swap</span>","<span class='text-primary'>Barter</span>","<span class='text-warning'>Trade</span>","<span class='text-danger'>Exchange</span>"];
+    var counter = 0;
+    var elem = document.getElementById("synonyms");
+    var inst = setInterval(change, 800);
 
-function change() {
-  elem.innerHTML = text[counter];
-  counter++;
-  if (counter >= text.length) {
-    counter = 0;
-    // clearInterval(inst); // uncomment this if you want to stop refreshing after one cycle
-  }
-}
+    function change() {
+      elem.innerHTML = text[counter];
+      counter++;
+      if (counter >= text.length) {
+        counter = 0;
+        // clearInterval(inst); // uncomment this if you want to stop refreshing after one cycle
+      }
+    }
 
   </script>
 

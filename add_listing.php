@@ -1,5 +1,5 @@
 <?php
-include('DBCONNECT.php');
+include("DBCONNECT.php");
 
 session_start();
 
@@ -10,14 +10,20 @@ else{
   $u_id = $_SESSION['u_id'];
 }
 
+$getuserdetailssql = "SELECT * FROM users WHERE U_ID = '$u_id'";
+$getuserdetails = mysqli_query($connectionString,$getuserdetailssql);
 
+$userdetailsarr = mysqli_fetch_array($getuserdetails);
+
+$user_name = $userdetailsarr['U_NAME'];
+$user_ver_state = $userdetailsarr['U_VER'];
+$user_img = $userdetailsarr['U_IMG_URL'];
 
 $getcategorysql = "SELECT * FROM product_categories";
 $getcategory = mysqli_query($connectionString,$getcategorysql);
 
 $getcategorysql1 = "SELECT * FROM product_categories";
 $getcategory1 = mysqli_query($connectionString,$getcategorysql1);
-
 
 
 if(isset($_POST['list'])){
@@ -81,13 +87,37 @@ if(isset($_POST['list'])){
 
         }
 
-    
+  ?>
+
+
+    <script>
+        document.getElementById('complete_toast').classList.add('show');
+    </script>
+
+    <div aria-live="polite" aria-atomic="true" class="bg-dark position-relative bd-example-toasts">
+        <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement">
+
+            <div class="toast" id="complete_toast">
+                <div class="toast-header">
+                    <img src="assets/img/check.svg" width="16" height="16" class="rounded me-2" alt="...">
+                    <strong class="me-auto">Listing Added Successfully</strong>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <a href="listing_details.php?id=<?php echo $listing_id?>">Preview Listing</a>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+<?php
+
 }
-
-
-
-
 ?>
+
 
 
 <!DOCTYPE html>
@@ -158,7 +188,7 @@ input[type="color"],
  {   
   border-color:#E5ECF5;
   outline: 0 none;
-  background-color: #E5ECF5;
+  background-color: whitesmoke;
   border-radius: 0px !important;
 }
 
@@ -181,10 +211,10 @@ input[type="color"]:focus,
 .form-select:focus,
 .form-control:focus
  {   
-  border-color:#E5ECF5;
+  border-color:black;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 3px rgba(126, 239, 104, 0.6);
   outline: 0 none;
-  background-color: #E5ECF5;
+  background-color: #f3f3f3;
 }
 #list_submit{ border-radius: 0; }
 
@@ -206,17 +236,12 @@ input[type="color"]:focus,
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
 
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto active" href="index.php">Home</a></li>
-          <li><a class="nav-link scrollto" href="store.php"> <i style="margin-left: 0px !important;" class='bx bx-coin bx-sm'></i> | <small> 100</small></a></li>
-          <li><a class="nav-link scrollto" href="logout.php">Logout</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+        <?php include_once('navbar.php') ?>
 
     </div>
   </header><!-- End Header -->
+
+
 
 
   <main id="main">
@@ -228,7 +253,7 @@ input[type="color"]:focus,
         <div class="d-flex justify-content-between align-items-center">
           <h2>Add Product Listing</h2>
           <ol>
-            <li><a href="index.php">Home</a></li>
+            <li><a href="product_listings.php">Manage Listings</a></li>
             <li>Add Listing</li>
           </ol>
         </div>
@@ -236,9 +261,14 @@ input[type="color"]:focus,
       </div>
     </section><!-- End Breadcrumbs -->
 
+
+
+
     <section class="inner-page">
+
       <div class="container">
-			 <form method="post" action="" enctype="multipart/form-data" class="row g-3">
+
+          <form method="post" action="" enctype="multipart/form-data" class="row g-3">
 
         <h5>Images of Your Product <br><span class="text-muted">
         
@@ -288,7 +318,7 @@ input[type="color"]:focus,
         
 
         <h5>Exchange Information</h5>
-        <hr> 
+        <hr>
 			  <div class="col-12">
 			    <label for="inputAddress2" class="form-label">Exchange Preference</label>
 			    <div class="form-check">
@@ -328,6 +358,7 @@ input[type="color"]:focus,
 			  <div class="mt-3">
 			    <button name="list" id="list_submit" type="submit" class="btn btn-success col-6">Complete Listing</button>
           </form>
+
 
           <a href="home.php"><button type="button" class="btn btn-secondary col-4">Cancel Listing</button></a>
 			  </div>
@@ -397,9 +428,6 @@ input[type="color"]:focus,
         }
 
     };
-   
-
-
 
     $('#gallery-photo-add').on('change', function() {
         imagesPreview(this, 'div.gallery');

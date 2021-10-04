@@ -9,9 +9,27 @@ else{
   $u_id = $_SESSION['u_id'];
 }
 
+$getuserdetailssql = "SELECT * FROM users WHERE U_ID = '$u_id'";
+$getuserdetails = mysqli_query($connectionString,$getuserdetailssql);
+
+$userdetailsarr = mysqli_fetch_array($getuserdetails);
+
+$user_name = $userdetailsarr['U_NAME'];
+$user_ver_state = $userdetailsarr['U_VER'];
+$user_img = $userdetailsarr['U_IMG_URL'];
+
+
 $p_id = $_GET['id'];
 
+$checkpreviewsql = "SELECT P_ID FROM products WHERE P_ID = '$p_id' AND P_BY_U_ID = '$u_id'";
+$checkpreview = mysqli_query($connectionString,$checkpreviewsql);
 
+if(mysqli_num_rows($checkpreview) > 0){
+    $action_btns = "disabled";
+}
+else{
+    $action_btns = " ";
+}
 
 $getallproductinfosql = "SELECT * FROM products
 INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID
@@ -24,7 +42,9 @@ $product_info_array = mysqli_fetch_array($getallproductinfo);
 if($product_info_array['P_BY_U_ID'] == $u_id){
   $_SESSION['views'] = 0;
 }
+
 else if($product_info_array['P_BY_U_ID'] != $u_id){
+  $_SESSION['views'] = 0;
   if(isset($_SESSION['views'])){
   $addviewsql = "UPDATE products SET P_VIEWS = P_VIEWS + 1 WHERE P_ID = '$p_id'";
   $addview = mysqli_query($connectionString,$addviewsql);
@@ -33,14 +53,16 @@ else if($product_info_array['P_BY_U_ID'] != $u_id){
 
 }
 
+$p_category = $product_info_array['P_CATEGORY'];
+$p_name = $product_info_array['P_NAME'];
+
 //--//
 
 $getproductssql = "SELECT * FROM products 
 INNER JOIN product_categories ON products.P_CATEGORY = product_categories.PC_ID 
 INNER JOIN users ON products.P_BY_U_ID = users.U_ID
-WHERE products.P_ID != '$p_id'
-ORDER BY P_VIEWS ASC; 
-";
+WHERE products.P_ID <> '$p_id'
+ORDER BY P_VIEWS ASC,P_CREATE_DATE DESC; ";
 $getproducts = mysqli_query($connectionString,$getproductssql);
 
 $curr_date = date("Y-m-d");
@@ -99,6 +121,19 @@ $curr_date = date("Y-m-d");
   opacity: 80%;
 }
 
+#swap_product_box{
+    border:1px dotted gray;
+    cursor: pointer;
+}
+
+#swap_product_box:hover{
+    border:2px solid gray;
+}
+
+.disableClick{
+    pointer-events: none;
+}
+
 
 </style>
 </head>
@@ -115,15 +150,7 @@ $curr_date = date("Y-m-d");
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
 
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto" href="index.php">Home</a></li>
-          <li><a class="nav-link scrollto" href="explore.php">Explore</a></li>
-          <li><a class="nav-link scrollto" href="store.php"> <i style="margin-left: 0px !important;" class='bx bx-coin bx-sm'> </i> 100</a></li>
-          <li><a class="nav-link scrollto" href="logout.php">Logout</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+        <?php include_once('navbar.php') ?>
 
     </div>
   </header><!-- End Header -->
@@ -135,9 +162,9 @@ $curr_date = date("Y-m-d");
       <div class="container">
 
         <div class="d-flex justify-content-between align-items-center">
-          <h2>Listing Details</h2>
+          <h2 >Listing Details</h2>
           <ol>
-            <li><a href="index.php">Home</a></li>
+            <li><a href="explore.php">Explore</a></li>
             <li>Listing Details</li>
           </ol>
         </div>
@@ -152,11 +179,11 @@ $curr_date = date("Y-m-d");
 
         <?php 
         if($product_info_array == null){
-        echo "<br><center>
+        echo "<br><div style='text-align: center;'>
         <h3 class='text-muted'>Listing Not Found</h3>
         <h6 class='text-muted'>May Have Been Removed Or Does Not Exist!</h6>
         <br>
-        </center>";
+        </div>";
         }
         else{
         ?>
@@ -164,6 +191,24 @@ $curr_date = date("Y-m-d");
         <div class="row gy-4">
 
           <div class="col-lg-8">
+            <span class="row">
+              <h2 class="col-10" style="align-self: center;"><?php echo $product_info_array['P_NAME'] ?></h2>
+                    <?php
+                      $checksavedsql = "SELECT * FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
+                      $checksaved = mysqli_query($connectionString,$checksavedsql);
+
+                    if(mysqli_num_rows($checksaved) == 0){
+                    ?>
+                     <a class="col" style="float: right; align-self: flex-end;" href="save_listing.php?id=<?php echo $p_id?>"><i class="ri-save-line ri-3x" style="align-self: center; float: right;" title="Save Listing"></i></a>
+                    <?php
+                    }
+                    else{
+                    ?>
+                    <a class="col" href="unsave_listing.php?id=<?php echo $p_id?>"><i class="ri-save-fill ri-3x" style="align-self: center; float: right;" title="Un-Save Listing"></i></a>
+                    <?php 
+                    }
+                    ?>
+              </span>      
 
             <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
                <div class="carousel-inner">
@@ -177,7 +222,7 @@ $curr_date = date("Y-m-d");
                 ?>
 
                 <div class="carousel-item <?php echo $first_active?>">
-                  <img src="<?php echo $image_row['PI_IMG_URL'] ?>" class="d-block w-100" style="max-height:40rem; aspect-ratio:4/3; background-color: black;" alt="">
+                  <img src="<?php echo $image_row['PI_IMG_URL'] ?>" class="d-block w-100" style="max-height:40rem; object-fit:scale-down; background-color: black; aspect-ratio: 16 / 9; background-color: black;" alt="">
                 </div>
 
                 <?php
@@ -198,45 +243,19 @@ $curr_date = date("Y-m-d");
 
             <br> 
 
-            <div class="portfolio-description p-2" >
-              <h2><?php echo $product_info_array['P_NAME'] ?></h2>
+            <div class="portfolio-description p-2" > 
               <p>
                 <?php echo $product_info_array['P_DESC'] ?>
               </p>
-            </div>
 
-          
-
-          </div>
-
-          <div class="col-lg-4 ml-3">
-              <span class="row">
-                    <?php
-                      $checksavedsql = "SELECT * FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
-                      $checksaved = mysqli_query($connectionString,$checksavedsql);
-
-                    if(mysqli_num_rows($checksaved) == 0){
-                    ?>
-                     <a style="float: left; align-self: flex-end;" href="save_listing.php?id=<?php echo $p_id?>"><i class="ri-save-line ri-3x" style="align-self: center;" title="Save Listing"></i></a>
-                    <?php
-                    }
-                    else{
-                    ?>
-                    <a style="float: left;" href="unsave_listing.php?id=<?php echo $p_id?>"><i class="ri-save-fill ri-3x" style="align-self: center;" title="Un-Save Listing"></i></a>
-                    <?php 
-                    }
-                    ?>
-              </span>      
-                  
-              
-
-              <div class="other-info">
+               <div class="other-info">
                <?php 
                if($product_info_array['P_EXC_TYPE'] == 0){
                ?>
 
-               <h3>Available For </h3>
-               <h2>PKR <span class="text-success"><?php echo $product_info_array['P_MONETARY_VAL'] ?></span></h2>
+               <div style="text-align: center;">
+               <h2><small>Price:</small> <strong>PKR <span class="text-success"><?php echo $product_info_array['P_MONETARY_VAL'] ?>/-</span></strong></h2>
+               </div>
 
                <?php
                }
@@ -264,24 +283,49 @@ $curr_date = date("Y-m-d");
                }
                ?>
               </div>
-          
-            <br>
+            </div>
 
-             <div class="portfolio-info p-4" >
-              <h3>Product Information</h3>
+          
+
+          </div>
+
+          <div class="col-lg-4 ml-3 ">   
+
+            <div class="contact-box mt-3">
+            
+              <?php 
+              if($product_info_array['P_EXC_TYPE'] == 0){
+                $text_to = "Buy Request";
+                $init = "buy";
+              }
+              else if($product_info_array['P_EXC_TYPE'] == 1){
+                $text_to = "Swap Deal";
+                  $init = "swap";
+              }
+              ?>
+
+                <a class="btn btn-primary col-12 text-light <?php echo $action_btns?>" href="chat.php?i=<?php echo $product_info_array['P_BY_U_ID']?>"><i style="vertical-align: sub;" class="ri-chat-3-line ri-lg"></i>  Chat Now</a>
+                <a class="btn btn-success col-12 mt-2 text-light <?php echo $action_btns?>" href="initiate_<?php echo $init?>.php?sp=<?php echo $product_info_array['P_ID']?>"> <i style="vertical-align: sub;" class="ri-exchange-funds-line ri-lg"></i>  Initiate <?php echo $text_to?></a>
+              </div>
+
+
+             <div class="portfolio-info p-4 mt-3 row">
+              <h3>Other Information</h3>
               <ul>
                 <li><strong>Category</strong>: <?php echo $product_info_array['PC_NAME']?></li>
-                <li><strong>Owner</strong>: <a href="profile_info.php?id=<?php echo $product_info_array['P_BY_U_ID']?>"><?php echo $product_info_array['U_NAME']?></a></li>
+                <li><strong>Owner</strong>: <a href="profile.php?id=<?php echo $product_info_array['P_BY_U_ID']?>"><?php echo $product_info_array['U_NAME']?></a></li>
                 <li><strong>Date Posted</strong>: <?php echo date('d-m-Y',strtotime($product_info_array['P_CREATE_DATE'])) ?>
                 </li>
                 <li><strong>Swap Type</strong>: 
               <?php 
               if($product_info_array['P_EXC_TYPE'] == 0){
+                
               ?>
               Money Preferred
               <?php
               }
               else if($product_info_array['P_EXC_TYPE'] == 1){
+                
               ?>
               Product Swap Preferred
               <?php
@@ -290,6 +334,8 @@ $curr_date = date("Y-m-d");
                 </li>
               </ul>
             </div>
+
+            
            
           </div>
 
@@ -335,7 +381,7 @@ $curr_date = date("Y-m-d");
             <div class="swiper-slide">
               
               
-              <div class="card border-<?php echo $color?> p-0" style="max-width: 25rem; margin: auto !important; align-self: center;">
+              <div class="card border-<?php echo $color?> p-0" style="max-width: 18rem; margin: auto !important; align-self: center;">
 
                  <?php 
                   while ($img_row = mysqli_fetch_assoc($getallproductimages)) {

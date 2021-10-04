@@ -15,9 +15,15 @@ else{
   $savelisting = mysqli_query($connectionString,$savelistingsql);
 
   if($savelisting){
-  	header('location:'.$from);
-  	echo "Saved";
+    if(strpos($from, 'explore.php')){
+      echo "Listing Saved";
+    }
+    else{
+    header('location:'.$from);
+    }
   }
+
+
 
 }
 

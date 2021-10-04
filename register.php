@@ -1,23 +1,21 @@
 <?php
 include('DBCONNECT.php');
-session_start();
-error_reporting(0);
 
-if($_SESSION['u_id'] != null){
+session_start();
+if($_SESSION['u_id'] !== null){
   header('location:home.php');
 }
 
+else{
 if(isset($_POST['register'])){
 	extract($_POST);
 
 	$num = random_int(1,10*100) * 3.141595;
 
-  $u_id = $_SESSION['u_id'];
 	$name = $_POST['fname'];
 	$email = $_POST['femail'];
 	$pass = $_POST['fpass'];
 	$phone = $_POST['fphone'];
-
 
 
 	$checkemailsql = "SELECT * FROM users WHERE U_EMAIL = '$email'";
@@ -29,20 +27,34 @@ if(isset($_POST['register'])){
 
 	else{
 
+	    $v_key = md5($num);
 
-	$v_key = md5($num);
+        $fileName = $_FILES['fdp']['name'];
+        $fileTempLocation = $_FILES['fdp']['tmp_name'];
+        $fileSize = $_FILES['fdp']['size'];
+        $fileError = $_FILES['fdp']['error'];
+        $filetype = $_FILES['fdp']['type'];
+
+        $filetypeget = explode('.',$fileName);
+        $fileEXT = strtolower(end($filetypeget));
+
+        $File_Name = uniqid('',true).".".'webp';
+
+        $FileGOTO_img = 'assets/dp_uploads/'.$File_Name;
+
+        move_uploaded_file($_FILES['fdp']['tmp_name'],$FileGOTO_img);
 
 
-	$registersql = "INSERT INTO `users`(`U_NAME`, `U_EMAIL`, `U_PASS`, `U_PHONE`, `U_VER_CODE`) VALUES ('$name','$email','$pass','$phone','$v_key')";
+	$registersql = "INSERT INTO users(`U_NAME`, `U_EMAIL`, `U_PASS`, `U_PHONE`,`U_IMG_URL`, `U_VER_CODE`) VALUES('$name','$email','$pass','$phone','$fileGOTO_img','$v_key')";
 	$register = mysqli_query($connectionString,$registersql);
 
 	$u_id = mysqli_insert_id($connectionString);
 
 
 	if($register){
-		
-		header("location:email_ver.php?id=$u_id");
-
+		//header("location:email_ver.php?id=$u_id");
+        echo "DONE";
+        echo $fileGOTO_img;
 	}
 
 
@@ -153,9 +165,10 @@ if(isset($_POST['register'])){
 
     <section class="inner-page">
       <div class="container">
-         <form action="" class="" method="post" id="form">
+         <form action="" enctype="multipart/form-data"  method="post" id="form">
           <h3>Register For A New Account</h3>
           <br>
+
                   <div class="form-floating mb-3">
                     <input name="fname" type="text" class="form-control" id="floatingInput" placeholder="name" required="">
                     <label for="floatingInput">Full Name</label>
@@ -172,6 +185,17 @@ if(isset($_POST['register'])){
                     <input name="fphone" type="phone" class="form-control" id="floatingPassword" placeholder="Phone" required="">
                     <label for="floatingPassword">Phone Number (+92)</label>
                   </div>
+
+
+             <br>
+
+                 <p style="font-size: 1.5rem;">Profile Image <span class="text-muted">(Optional)</span></p>
+                 <div>
+                     <input name="fdp" class="form-control form-control-lg" type="file">
+                 </div>
+
+
+
                    <br>
                   <input type="submit" name="register" class="btn btn-primary col-12 align-middle p-2" value="Register">
                   <br><br>
@@ -220,6 +244,11 @@ if(isset($_POST['register'])){
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
 
+
 </body>
 
 </html>
+
+<?php
+}
+    ?>

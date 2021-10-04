@@ -1,15 +1,16 @@
-/**
-* Template Name: BarterMate - v4.3.0
-* Template URL: https://bootstrapmade.com/BarterMate-bootstrap-template/
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
 
 /*--------------------------------------------------------------
 # General
 jade: #0b6623
 light jade: #14b53e
 --------------------------------------------------------------*/
+
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+
+.dropdown-menu{
+  overflow: hidden;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -34,9 +35,11 @@ html {
   background: #0b6623; 
 }
 
+
 body {
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Oxygen', sans-serif;
   color: #444444;
+  font-weight: 400;
 }
 
 a {
@@ -50,7 +53,8 @@ a:hover {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Raleway", sans-serif;
+  font-family: "Oxygen", sans-serif;
+  font-weight: 700;
 }
 
 
@@ -105,7 +109,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.5s;
   z-index: 997;
   transition: all 0.5s;
-  background: rgba(42, 44, 57, 0.9);
+  background:black;
 }
 
 #header.header-transparent {
@@ -178,7 +182,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar a:hover, .navbar .active, .navbar .active:focus, .navbar li:hover > a {
-  background: #0b6623;
+  background: transparent;
+  color:whitesmoke ;
 }
 
 .nav-link:hover{
@@ -817,7 +822,7 @@ section {
 }
 
 .portfolio .portfolio-item .portfolio-img img {
-  transition: all 0.8s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .portfolio .portfolio-item .portfolio-info {

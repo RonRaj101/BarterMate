@@ -15,10 +15,14 @@ else{
   $unsavelistingsql = "DELETE FROM saved_products WHERE S_P_ID = '$p_id' AND S_BY_U_ID = '$u_id'";
   $unsavelisting = mysqli_query($connectionString,$unsavelistingsql);
 
-  if($unsavelisting){
-  	header('location:'.$from);
-  	echo "Un-Saved";
-  }
+    if($unsavelisting){
+        if(strpos($from, 'explore.php')){
+            echo "Listing Un-Saved";
+        }
+        else{
+            header('location:'.$from);
+        }
+    }
 
 }
 
